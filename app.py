@@ -2,8 +2,12 @@ import streamlit as st
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import openai
 import os
 plt.rcParams['font.family'] = 'DejaVu Sans'
+
+# Set OpenAI API key securely
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 # Set page config
 st.set_page_config(page_title="Planet at Risk", layout="wide", page_icon="favicon.ico")
@@ -42,7 +46,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Sidebar Navigation
-page = st.sidebar.radio("Navigate", ("🌍 Dashboard", "📢 Awareness & Solutions", "📚 Credits"))
+page = st.sidebar.radio("Navigate", ("🌍 Dashboard", "📢 Awareness & Solutions", "🤖 Ask Planet AI", "📚 Credits"))
 
 # Define file paths
 data_dir = "data"
@@ -162,6 +166,27 @@ elif page == "📢 Awareness & Solutions":
     Together, small actions create a huge impact!
     """)
 
+elif page == "🤖 Ask Planet AI":
+    st.header("🤖 Ask Planet AI about Climate, Earth & Solutions!")
+    st.markdown("Feel free to ask anything about climate change, disasters, deforestation, CO₂, and how we can help!")
+
+    user_input = st.text_input("Ask your question:")
+
+    if user_input:
+        with st.spinner("Thinking... 🌍"):
+            try:
+                response = openai.ChatCompletion.create(
+                    model="gpt-4",
+                    messages=[
+                        {"role": "system", "content": "You are Planet AI, an expert on climate change, environment, and sustainability. Help users understand the risks and solutions in a positive and inspiring way."},
+                        {"role": "user", "content": user_input}
+                    ]
+                )
+                answer = response['choices'][0]['message']['content']
+                st.success(answer)
+            except Exception as e:
+                st.error(f"⚠️ OpenAI API error: {e}")
+
 elif page == "📚 Credits":
     st.header("📚 Credits")
     st.markdown("""
@@ -173,4 +198,3 @@ elif page == "📚 Credits":
 
     *This dashboard is built for educational awareness. 🌏 Made with ❤️ by Abhimanyu & Abeer.*
     """)
-
