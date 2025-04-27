@@ -53,7 +53,12 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Sidebar Navigation
-page = st.sidebar.radio("Navigate", ("🌍 Dashboard", "📢 Awareness & Solutions", "🤖 Ask Planet AI", "🔮 Disaster Forecast", "📚 Credits"))
+page = st.radio(
+    "Navigate",
+    ("🌍 Dashboard", "📢 Awareness & Solutions", "🤖 Ask Planet AI", "🔮 Disaster Forecast", "📚 Credits"),
+    horizontal=True
+)
+
 
 # Define file paths
 data_dir = "data"
