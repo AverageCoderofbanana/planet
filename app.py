@@ -179,7 +179,7 @@ elif page == "🤖 Ask Planet AI":
     if user_input:
         with st.spinner("Thinking... 🌍"):
             try:
-                model = genai.GenerativeModel('gemini-pro')
+                model = genai.GenerativeModel('gemini-1.5-pro')
                 response = model.generate_content(user_input)
                 st.success(response.text)
             except Exception as e:
