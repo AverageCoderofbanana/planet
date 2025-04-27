@@ -4,6 +4,10 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import openai
 import os
+import google.generativeai as genai
+
+# Set your Gemini API key securely
+genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 plt.rcParams['font.family'] = 'DejaVu Sans'
 
 # Set OpenAI API key securely
@@ -151,7 +155,6 @@ if page == "🌍 Dashboard":
         glacier_data = glacier_df[glacier_df['Entity'] == selected_glacier]
         if 'Year' in glacier_data.columns and 'Cumulative mass balance' in glacier_data.columns:
             seaborn_lineplot(glacier_data, 'Year', 'Cumulative mass balance', f"Mass Loss - {selected_glacier}", "Year", "Cumulative Mass Loss (Gt)", color="deepskyblue")
-
 elif page == "📢 Awareness & Solutions":
     st.header("📢 Awareness and Ways to Help 🌎")
     st.markdown("""
@@ -166,10 +169,6 @@ elif page == "📢 Awareness & Solutions":
     Together, small actions create a huge impact!
     """)
 
-import google.generativeai as genai
-
-# Set your Gemini API key securely
-genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 
 elif page == "🤖 Ask Planet AI":
     st.header("🤖 Ask Planet AI about Climate, Earth & Solutions!")
