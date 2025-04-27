@@ -166,16 +166,25 @@ elif page == "📢 Awareness & Solutions":
     Together, small actions create a huge impact!
     """)
 
+import google.generativeai as genai
+
+# Set your Gemini API key securely
+genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+
 elif page == "🤖 Ask Planet AI":
     st.header("🤖 Ask Planet AI about Climate, Earth & Solutions!")
-    st.markdown("Chat directly with AI about climate change, disasters, deforestation, CO₂, and solutions!")
+    st.markdown("Feel free to ask anything about climate change, disasters, deforestation, CO₂, and how we can help!")
 
-    st.markdown("""
-        <iframe src="https://poe.com/ChatGPT" width="100%" height="700px" style="border:none; border-radius: 10px; overflow:hidden;"></iframe>
-    """, unsafe_allow_html=True)
+    user_input = st.text_input("Ask your question:")
 
-    st.info("📝 Make sure you are logged into [Poe.com](https://poe.com) in your browser for the chat to load.")
-
+    if user_input:
+        with st.spinner("Thinking... 🌍"):
+            try:
+                model = genai.GenerativeModel('gemini-pro')
+                response = model.generate_content(user_input)
+                st.success(response.text)
+            except Exception as e:
+                st.error(f"⚠️ Gemini API error: {e}")
 
 
 elif page == "📚 Credits":
