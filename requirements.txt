@@ -4,3 +4,5 @@ matplotlib
 seaborn
 openai
 google.generativeai
+sklearn.linear_model
+numpy
