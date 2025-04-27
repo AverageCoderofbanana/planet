@@ -197,6 +197,13 @@ def get_temperature(place):
     except Exception as e:
         return f"⚠️ Error fetching temperature: {e}"
 
+import re
+import time
+import streamlit as st
+import google.generativeai as genai  # assuming this is how you imported Gemini
+
+# --- Your get_temperature function assumed to be defined above ---
+
 with tab3:
     st.header("🤖 Ask Planet AI about Climate, Earth & Solutions!")
     st.markdown("Feel free to ask anything about climate change, disasters, CO₂, deforestation, OR current temperatures!")
@@ -206,50 +213,20 @@ with tab3:
     if user_input:
         with st.spinner("Thinking... 🌎"):
             try:
-                # 1. Check if it's a temperature-related question
                 temp_keywords = ["temperature", "temp", "weather", "hot", "cold"]
                 if any(keyword in user_input.lower() for keyword in temp_keywords):
-                    match = re.search(r"temperature (?:in|at|of)?\s*(.*)", user_input.lower())
-                    if not match:
-                        match = re.search(r"weather (?:in|at|of)?\s*(.*)", user_input.lower())
-                    if match:
+                    # --- It's a temperature/weather related question ---
+                    match = re.search(r"(?:temperature|weather) (?:in|at|of)?\s*(.*)", user_input.lower())
+
+                    if match and match.group(1).strip():
                         place = match.group(1).strip().title()
                         temperature_result = get_temperature(place)
                         st.success(temperature_result)
                     else:
-                        # Proceed to Gemini if no place detected
-                        model = genai.GenerativeModel('gemini-1.5-pro')
-
-                        system_prompt = (
-                            "You are PlanetAI, an expert in climate change, natural disasters, environmental protection, CO₂ emissions, deforestation, "
-                            "and sustainability. Only answer questions related to these topics. "
-                            "If the user's question is irrelevant (like gaming, politics, or gossip), politely reply: "
-                            "'I'm here to assist only with climate, environment, and Earth-related topics! 🌍' "
-                            "Here is the user's question:\n"
-                            f"{user_input}"
-                        )
-
-                        response = model.generate_content(system_prompt)
-                        full_response = response.text
-
-                        output_placeholder = st.empty()
-                        displayed_text = ""
-                        cursor_visible = True
-
-                        for char in full_response:
-                            displayed_text += char
-                            if cursor_visible:
-                                output_placeholder.markdown(f"🧠 {displayed_text}|")
-                            else:
-                                output_placeholder.markdown(f"🧠 {displayed_text} ")
-                            cursor_visible = not cursor_visible
-                            time.sleep(0.02)
-
-                        output_placeholder.markdown(f"🧠 {displayed_text}")
-                        st.success("Done! ✅")
-
+                        # If no place is detected, default to a global message or ask again
+                        st.info("Please specify a location for weather info! 🌎 For example: 'What's the temperature in Delhi?'")
                 else:
-                    # 2. Not about temperature, send normally to Gemini
+                    # --- It's NOT a temperature/weather question, send to Gemini ---
                     model = genai.GenerativeModel('gemini-1.5-pro')
 
                     system_prompt = (
@@ -282,6 +259,7 @@ with tab3:
 
             except Exception as e:
                 st.error(f"⚠️ Error: {e}")
+
 
 
 
