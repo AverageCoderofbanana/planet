@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import os
 plt.rcParams['font.family'] = 'DejaVu Sans'
 
 # Set page config
@@ -44,7 +45,7 @@ st.markdown("""
 page = st.sidebar.radio("Navigate", ("🌍 Dashboard", "📢 Awareness & Solutions", "📚 Credits"))
 
 # Define file paths
-data_dir = "C:/Users/Richa.Arya/Music/yes"
+data_dir = "data"
 temp_path = f"{data_dir}/GLB.Ts+dSST.csv"
 disasters_path = f"{data_dir}/number-of-natural-disaster-events.csv"
 forest_path = f"{data_dir}/annual-change-forest-area.csv"
