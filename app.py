@@ -4,14 +4,15 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import openai
 import os
+plt.rcParams['font.family'] = 'DejaVu Sans'
+
+# Set OpenAI API key securely
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 # Set page config
-st.set_page_config(page_title="Planet at Risk", layout="wide", page_icon="🌍")
+st.set_page_config(page_title="Planet at Risk", layout="wide", page_icon="favicon.ico")
 
-# OpenAI Client Initialization
-openai_client = st.secrets["OPENAI_API_KEY"]
-
-# Custom CSS
+# Inject custom CSS (including upgraded animation)
 st.markdown("""
     <style>
     html, body, [class*="css"] {
@@ -44,7 +45,10 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Load data paths
+# Sidebar Navigation
+page = st.sidebar.radio("Navigate", ("🌍 Dashboard", "📢 Awareness & Solutions", "🤖 Ask Planet AI", "📚 Credits"))
+
+# Define file paths
 data_dir = "data"
 temp_path = f"{data_dir}/GLB.Ts+dSST.csv"
 disasters_path = f"{data_dir}/number-of-natural-disaster-events.csv"
@@ -52,29 +56,15 @@ forest_path = f"{data_dir}/annual-change-forest-area.csv"
 co2_path = f"{data_dir}/annual-co2-emissions-per-country.csv"
 glacier_path = f"{data_dir}/mass-us-glaciers.csv"
 
-# Load datasets
+# Load data
 def load_data(path, **kwargs):
     try:
         return pd.read_csv(path, **kwargs)
     except Exception as e:
-        st.warning(f"⚠️ Could not load {path}. Error: {e}")
+        st.warning(f"⚠️ Could not load file: {path}. Error: {e}")
         return None
 
-# AI Assistant
-def ask_ai(prompt):
-    try:
-        response = openai_client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant specializing in climate change and environmental issues."},
-                {"role": "user", "content": prompt}
-            ]
-        )
-        return response.choices[0].message.content
-    except Exception as e:
-        return f"⚠️ Error contacting AI: {e}"
-
-# Plot helper
+# Plot helper (with black background)
 def seaborn_lineplot(df, x, y, title, xlabel, ylabel, color="blue"):
     fig, ax = plt.subplots(figsize=(10, 5), facecolor='black')
     ax.set_facecolor('black')
@@ -87,24 +77,21 @@ def seaborn_lineplot(df, x, y, title, xlabel, ylabel, color="blue"):
     ax.tick_params(axis='y', colors='white', labelsize=10)
     st.pyplot(fig)
 
-# Animated Title
+# Header with Enhanced Animation
 st.markdown("""
     <h1 class='animated-title'>
         🌍 Planet at Risk
     </h1>
 """, unsafe_allow_html=True)
 
-# Sidebar Navigation
-page = st.sidebar.radio("Navigate", ("🌍 Dashboard", "📢 Awareness & Solutions", "📚 Credits"))
-
-# Load all datasets
+# Load datasets
 temp_df = load_data(temp_path, skiprows=1)
 disasters_df = load_data(disasters_path)
 forest_df = load_data(forest_path)
 co2_df = load_data(co2_path)
 glacier_df = load_data(glacier_path)
 
-# Pages
+# Sidebar options and pages
 if page == "🌍 Dashboard":
     st.sidebar.markdown("""
     ### 📊 Dashboard Features
@@ -121,6 +108,7 @@ if page == "🌍 Dashboard":
     show_co2 = st.sidebar.checkbox("💨 Show CO₂ Emissions", True)
     show_glacier = st.sidebar.checkbox("🧊 Show Glacier Mass Loss", True)
 
+    # 1. Temperature Anomalies
     if show_temp and temp_df is not None:
         try:
             temp_df.rename(columns={temp_df.columns[0]: "Year"}, inplace=True)
@@ -130,15 +118,17 @@ if page == "🌍 Dashboard":
             temperature_df = temp_df[['Year', 'Anomaly (°C)']].dropna()
             seaborn_lineplot(temperature_df, 'Year', 'Anomaly (°C)', "Global Temperature Anomalies", "Year", "Anomaly (°C)", color="darkorange")
         except Exception as e:
-            st.warning(f"⚠️ Error parsing temperature data: {e}")
+            st.warning(f"⚠️ Error parsing NASA temperature data: {e}")
 
+    # 2. Natural Disaster Events
     if show_disasters and disasters_df is not None:
         filtered_disasters = disasters_df[disasters_df['Entity'] == 'All disasters']
         if 'Year' in filtered_disasters.columns and 'Disasters' in filtered_disasters.columns:
             seaborn_lineplot(filtered_disasters, 'Year', 'Disasters', "Natural Disaster Events", "Year", "Number of Disasters", color="crimson")
         else:
-            st.warning("⚠️ Columns missing in disasters dataset.")
+            st.warning("⚠️ Required columns missing in disaster data.")
 
+    # 3. Forest Area Change
     if show_forest and forest_df is not None:
         countries = forest_df['Entity'].unique().tolist()
         selected_country = st.selectbox("🌳 Select Country for Forest Area Change", countries)
@@ -146,13 +136,15 @@ if page == "🌍 Dashboard":
         if 'Year' in country_forest.columns and 'Annual net change in forest area' in country_forest.columns:
             seaborn_lineplot(country_forest, 'Year', 'Annual net change in forest area', f"Forest Area Change in {selected_country}", "Year", "Forest Change (hectares)", color="forestgreen")
 
+    # 4. CO₂ Emissions
     if show_co2 and co2_df is not None:
         co2_countries = co2_df['Entity'].unique().tolist()
-        selected_co2_country = st.selectbox("💨 Select Country for CO₂ Emissions", co2_countries)
+        selected_co2_country = st.selectbox("💨 Select Country for CO2 Emissions", co2_countries)
         country_co2 = co2_df[co2_df['Entity'] == selected_co2_country]
         if 'Year' in country_co2.columns and 'Annual CO₂ emissions' in country_co2.columns:
-            seaborn_lineplot(country_co2, 'Year', 'Annual CO₂ emissions', f"CO₂ Emissions in {selected_co2_country}", "Year", "Emissions (tonnes)", color="#CCCCCC")
+            seaborn_lineplot(country_co2, 'Year', 'Annual CO₂ emissions', f"CO2 Emissions in {selected_co2_country}", "Year", "Emissions (tonnes)", color="#CCCCCC")
 
+    # 5. Glacier Mass Loss
     if show_glacier and glacier_df is not None:
         glacier_names = glacier_df['Entity'].unique().tolist()
         selected_glacier = st.selectbox("🧊 Select Glacier for Mass Loss", glacier_names)
@@ -174,14 +166,26 @@ elif page == "📢 Awareness & Solutions":
     Together, small actions create a huge impact!
     """)
 
-    st.subheader("💬 Ask AI for Climate Advice:")
-    user_question = st.text_input("Ask anything about fighting climate change:")
-    if st.button("Ask AI"):
-        if user_question:
-            ai_response = ask_ai(user_question)
-            st.success(ai_response)
-        else:
-            st.warning("Please enter a question.")
+elif page == "🤖 Ask Planet AI":
+    st.header("🤖 Ask Planet AI about Climate, Earth & Solutions!")
+    st.markdown("Feel free to ask anything about climate change, disasters, deforestation, CO₂, and how we can help!")
+
+    user_input = st.text_input("Ask your question:")
+
+    if user_input:
+        with st.spinner("Thinking... 🌍"):
+            try:
+                response = openai.ChatCompletion.create(
+                    model="gpt-4",
+                    messages=[
+                        {"role": "system", "content": "You are Planet AI, an expert on climate change, environment, and sustainability. Help users understand the risks and solutions in a positive and inspiring way."},
+                        {"role": "user", "content": user_input}
+                    ]
+                )
+                answer = response['choices'][0]['message']['content']
+                st.success(answer)
+            except Exception as e:
+                st.error(f"⚠️ OpenAI API error: {e}")
 
 elif page == "📚 Credits":
     st.header("📚 Credits")
@@ -194,4 +198,3 @@ elif page == "📚 Credits":
 
     *This dashboard is built for educational awareness. 🌏 Made with ❤️ by Abhimanyu & Abeer.*
     """)
-
