@@ -177,7 +177,18 @@ with tab3:
         with st.spinner("Thinking... 🌍"):
             try:
                 model = genai.GenerativeModel('gemini-1.5-pro')
-                response = model.generate_content(user_input)
+
+                # Restrict topic
+                system_prompt = (
+                    "You are PlanetAI, an expert in climate change, natural disasters, environmental protection, CO₂ emissions, deforestation, "
+                    "and sustainability. Only answer questions related to these topics. "
+                    "If the user's question is irrelevant (like about gaming, politics, or anything non-climate), politely reply: "
+                    "'I'm here to assist only with climate, environment, and Earth-related topics. 🌎 Please ask something about that!' "
+                    "Here is the user's question:\n"
+                    f"{user_input}"
+                )
+
+                response = model.generate_content(system_prompt)
                 full_response = response.text
 
                 output_placeholder = st.empty()
@@ -198,6 +209,7 @@ with tab3:
 
             except Exception as e:
                 st.error(f"⚠️ Gemini API error: {e}")
+
 
 # ----------------- 🔮 Disaster Forecast -------------------
 with tab4:
