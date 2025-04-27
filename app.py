@@ -175,17 +175,18 @@ elif page == "🤖 Ask Planet AI":
     if user_input:
         with st.spinner("Thinking... 🌍"):
             try:
-                response = openai.ChatCompletion.create(
+                response = openai.chat.completions.create(
                     model="gpt-4",
                     messages=[
                         {"role": "system", "content": "You are Planet AI, an expert on climate change, environment, and sustainability. Help users understand the risks and solutions in a positive and inspiring way."},
                         {"role": "user", "content": user_input}
                     ]
                 )
-                answer = response['choices'][0]['message']['content']
+                answer = response.choices[0].message.content
                 st.success(answer)
             except Exception as e:
                 st.error(f"⚠️ OpenAI API error: {e}")
+
 
 elif page == "📚 Credits":
     st.header("📚 Credits")
