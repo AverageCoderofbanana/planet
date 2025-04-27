@@ -6,6 +6,8 @@ import openai
 import os
 import google.generativeai as genai
 import time
+from sklearn.linear_model import LinearRegression
+import numpy as np
 
 # Set your Gemini API key securely
 genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
@@ -51,7 +53,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Sidebar Navigation
-page = st.sidebar.radio("Navigate", ("🌍 Dashboard", "📢 Awareness & Solutions", "🤖 Ask Planet AI", "📚 Credits"))
+page = st.sidebar.radio("Navigate", ("🌍 Dashboard", "📢 Awareness & Solutions", "🤖 Ask Planet AI", "🔮 Disaster Forecast", "📚 Credits"))
 
 # Define file paths
 data_dir = "data"
@@ -156,6 +158,7 @@ if page == "🌍 Dashboard":
         glacier_data = glacier_df[glacier_df['Entity'] == selected_glacier]
         if 'Year' in glacier_data.columns and 'Cumulative mass balance' in glacier_data.columns:
             seaborn_lineplot(glacier_data, 'Year', 'Cumulative mass balance', f"Mass Loss - {selected_glacier}", "Year", "Cumulative Mass Loss (Gt)", color="deepskyblue")
+
 elif page == "📢 Awareness & Solutions":
     st.header("📢 Awareness and Ways to Help 🌎")
     st.markdown("""
@@ -170,9 +173,6 @@ elif page == "📢 Awareness & Solutions":
     Together, small actions create a huge impact!
     """)
 
-
-
-
 elif page == "🤖 Ask Planet AI":
     st.header("🤖 Ask Planet AI about Climate, Earth & Solutions!")
     st.markdown("Feel free to ask anything about climate change, disasters, deforestation, CO₂, and how we can help!")
@@ -186,29 +186,55 @@ elif page == "🤖 Ask Planet AI":
                 response = model.generate_content(user_input)
                 full_response = response.text
 
-                # Streaming effect with blinking cursor
                 output_placeholder = st.empty()
                 displayed_text = ""
-
                 cursor_visible = True
+
                 for char in full_response:
                     displayed_text += char
-                    # Toggle cursor every few characters
                     if cursor_visible:
                         output_placeholder.markdown(f"🧠 {displayed_text}|")
                     else:
                         output_placeholder.markdown(f"🧠 {displayed_text} ")
                     cursor_visible = not cursor_visible
-                    time.sleep(0.02)  # 20ms delay for smoother typing
+                    time.sleep(0.02)
 
-                # Final full response without cursor
                 output_placeholder.markdown(f"🧠 {displayed_text}")
                 st.success("Done! ✅")
 
             except Exception as e:
                 st.error(f"⚠️ Gemini API error: {e}")
 
-
+elif page == "🔮 Disaster Forecast":
+    st.header("🔮 Disaster Forecast for the Future")
+    
+    if disasters_df is not None:
+        st.subheader("📈 Projected Number of Natural Disasters (2025–2040)")
+        
+        filtered_disasters = disasters_df[disasters_df['Entity'] == 'All disasters']
+        X = filtered_disasters['Year'].values.reshape(-1,1)
+        y = filtered_disasters['Disasters'].values
+        
+        model = LinearRegression()
+        model.fit(X, y)
+        
+        future_years = np.arange(2025, 2041).reshape(-1,1)
+        future_preds = model.predict(future_years)
+        
+        forecast_df = pd.DataFrame({'Year': future_years.flatten(), 'Predicted Disasters': future_preds})
+        
+        seaborn_lineplot(forecast_df, 'Year', 'Predicted Disasters', "Projected Natural Disasters", "Year", "Predicted Number of Disasters", color="violet")
+    
+    with st.spinner("Generating future forecast..."):
+        try:
+            model = genai.GenerativeModel('gemini-1.5-pro')
+            prompt = "Predict the trend of global natural disasters between 2025 and 2040 considering rising climate change impacts. Give a short futuristic summary."
+            response = model.generate_content(prompt)
+            forecast_text = response.text
+            st.success("Forecast ready! ✅")
+            st.markdown(f"📝 **AI Prediction Summary:**\n\n{forecast_text}")
+        except Exception as e:
+            st.error(f"⚠️ Gemini API error: {e}")
 
 elif page == "📚 Credits":
     st.header("📚 Credits")
