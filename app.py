@@ -9,7 +9,7 @@ import os
 st.set_page_config(page_title="Planet at Risk", layout="wide", page_icon="🌍")
 
 # OpenAI Client Initialization
-openai_client = st.secrets["OPEN_API_KEY"]
+openai_client = st.secrets["OPENAI_API_KEY"]
 
 # Custom CSS
 st.markdown("""
