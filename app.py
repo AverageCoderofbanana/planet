@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import openai
 import os
 import google.generativeai as genai
+import time
 
 # Set your Gemini API key securely
 genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
@@ -170,7 +171,7 @@ elif page == "📢 Awareness & Solutions":
     """)
 
 
-import time
+
 
 elif page == "🤖 Ask Planet AI":
     st.header("🤖 Ask Planet AI about Climate, Earth & Solutions!")
