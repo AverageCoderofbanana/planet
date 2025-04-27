@@ -170,6 +170,8 @@ elif page == "📢 Awareness & Solutions":
     """)
 
 
+import time
+
 elif page == "🤖 Ask Planet AI":
     st.header("🤖 Ask Planet AI about Climate, Earth & Solutions!")
     st.markdown("Feel free to ask anything about climate change, disasters, deforestation, CO₂, and how we can help!")
@@ -181,9 +183,30 @@ elif page == "🤖 Ask Planet AI":
             try:
                 model = genai.GenerativeModel('gemini-1.5-pro')
                 response = model.generate_content(user_input)
-                st.success(response.text)
+                full_response = response.text
+
+                # Streaming effect with blinking cursor
+                output_placeholder = st.empty()
+                displayed_text = ""
+
+                cursor_visible = True
+                for char in full_response:
+                    displayed_text += char
+                    # Toggle cursor every few characters
+                    if cursor_visible:
+                        output_placeholder.markdown(f"🧠 {displayed_text}|")
+                    else:
+                        output_placeholder.markdown(f"🧠 {displayed_text} ")
+                    cursor_visible = not cursor_visible
+                    time.sleep(0.02)  # 20ms delay for smoother typing
+
+                # Final full response without cursor
+                output_placeholder.markdown(f"🧠 {displayed_text}")
+                st.success("Done! ✅")
+
             except Exception as e:
                 st.error(f"⚠️ Gemini API error: {e}")
+
 
 
 elif page == "📚 Credits":
