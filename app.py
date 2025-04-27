@@ -168,24 +168,14 @@ elif page == "📢 Awareness & Solutions":
 
 elif page == "🤖 Ask Planet AI":
     st.header("🤖 Ask Planet AI about Climate, Earth & Solutions!")
-    st.markdown("Feel free to ask anything about climate change, disasters, deforestation, CO₂, and how we can help!")
+    st.markdown("Chat directly with AI about climate change, disasters, deforestation, CO₂, and solutions!")
 
-    user_input = st.text_input("Ask your question:")
+    st.markdown("""
+        <iframe src="https://poe.com/ChatGPT" width="100%" height="700px" style="border:none; border-radius: 10px; overflow:hidden;"></iframe>
+    """, unsafe_allow_html=True)
 
-    if user_input:
-        with st.spinner("Thinking... 🌍"):
-            try:
-                response = openai.chat.completions.create(
-                    model="gpt-3.5-turbo",
-                    messages=[
-                        {"role": "system", "content": "You are Planet AI, an expert on climate change, environment, and sustainability. Help users understand the risks and solutions in a positive and inspiring way."},
-                        {"role": "user", "content": user_input}
-                    ]
-                )
-                answer = response.choices[0].message.content
-                st.success(answer)
-            except Exception as e:
-                st.error(f"⚠️ OpenAI API error: {e}")
+    st.info("📝 Make sure you are logged into [Poe.com](https://poe.com) in your browser for the chat to load.")
+
 
 
 elif page == "📚 Credits":
