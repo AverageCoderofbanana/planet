@@ -176,7 +176,7 @@ elif page == "🤖 Ask Planet AI":
         with st.spinner("Thinking... 🌍"):
             try:
                 response = openai.chat.completions.create(
-                    model="gpt-4",
+                    model="gpt-3.5-turbo",
                     messages=[
                         {"role": "system", "content": "You are Planet AI, an expert on climate change, environment, and sustainability. Help users understand the risks and solutions in a positive and inspiring way."},
                         {"role": "user", "content": user_input}
