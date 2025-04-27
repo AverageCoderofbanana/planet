@@ -6,7 +6,7 @@ import os
 plt.rcParams['font.family'] = 'DejaVu Sans'
 
 # Set page config
-st.set_page_config(page_title="Planet at Risk", layout="wide", page_icon="C:/Users/Richa.Arya/Music/yes/favicon.ico")
+st.set_page_config(page_title="Planet at Risk", layout="wide", page_icon="favicon.ico")
 
 # Inject custom CSS (including upgraded animation)
 st.markdown("""
