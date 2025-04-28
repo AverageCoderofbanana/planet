@@ -182,7 +182,7 @@ with tab3:
         with st.spinner("Thinking... 🌎"):
             try:
                 # No more temperature special handling, everything goes to Gemini
-                model = genai.GenerativeModel('gemini-1.5-pro')
+                model = genai.GenerativeModel('gemini-2.0-flash-lite')
 
                 system_prompt = (
                     "You are PlanetAI, an expert in climate change, natural disasters, environmental protection, CO₂ emissions, deforestation, "
