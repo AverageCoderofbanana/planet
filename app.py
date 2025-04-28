@@ -170,32 +170,7 @@ with tab2:
 # ----------------- 🤖 Ask Planet AI -------------------
 
 
-def get_temperature(place):
-    try:
-        # Use Open-Meteo Geocoding API to get lat/lon
-        geo_url = f"https://geocoding-api.open-meteo.com/v1/search?name={place}&count=1"
-        geo_response = requests.get(geo_url)
-        geo_data = geo_response.json()
 
-        if "results" not in geo_data or not geo_data["results"]:
-            return "❌ Could not find the location. Try a different name."
-
-        latitude = geo_data["results"][0]["latitude"]
-        longitude = geo_data["results"][0]["longitude"]
-
-        # Use Open-Meteo Weather API to get current weather
-        weather_url = f"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&current_weather=true"
-        weather_response = requests.get(weather_url)
-        weather_data = weather_response.json()
-
-        if "current_weather" in weather_data:
-            temp_celsius = weather_data["current_weather"]["temperature"]
-            return f"🌡️ Current temperature in {place} is {temp_celsius}°C."
-        else:
-            return "❌ Could not fetch current temperature."
-
-    except Exception as e:
-        return f"⚠️ Error fetching temperature: {e}"
 
 with tab3:
     st.header("🤖 Ask Planet AI about Climate, Earth & Solutions!")
@@ -206,82 +181,40 @@ with tab3:
     if user_input:
         with st.spinner("Thinking... 🌎"):
             try:
-                # 1. Check if it's a temperature-related question
-                temp_keywords = ["temperature", "temp", "weather", "hot", "cold"]
-                if any(keyword in user_input.lower() for keyword in temp_keywords):
-                    match = re.search(r"temperature (?:in|at|of)?\s*(.*)", user_input.lower())
-                    if not match:
-                        match = re.search(r"weather (?:in|at|of)?\s*(.*)", user_input.lower())
-                    if match:
-                        place = match.group(1).strip().title()
-                        temperature_result = get_temperature(place)
-                        st.success(temperature_result)
+                # No more temperature special handling, everything goes to Gemini
+                model = genai.GenerativeModel('gemini-1.5-pro')
+
+                system_prompt = (
+                    "You are PlanetAI, an expert in climate change, natural disasters, environmental protection, CO₂ emissions, deforestation, "
+                    "and sustainability. Only answer questions related to these topics. "
+                    "If the user's question is irrelevant (like gaming, politics, or gossip), politely reply: "
+                    "'I'm here to assist only with climate, environment, and Earth-related topics! 🌍' "
+                    "Here is the user's question:\n"
+                    f"{user_input}"
+                )
+
+                response = model.generate_content(system_prompt)
+                full_response = response.text
+
+                output_placeholder = st.empty()
+                displayed_text = ""
+                cursor_visible = True
+
+                for char in full_response:
+                    displayed_text += char
+                    if cursor_visible:
+                        output_placeholder.markdown(f"🧠 {displayed_text}|")
                     else:
-                        # Proceed to Gemini if no place detected
-                        model = genai.GenerativeModel('gemini-1.5-pro')
+                        output_placeholder.markdown(f"🧠 {displayed_text} ")
+                    cursor_visible = not cursor_visible
+                    time.sleep(0.02)
 
-                        system_prompt = (
-                            "You are PlanetAI, an expert in climate change, natural disasters, environmental protection, CO₂ emissions, deforestation, "
-                            "and sustainability. Only answer questions related to these topics. "
-                            "If the user's question is irrelevant (like gaming, politics, or gossip), politely reply: "
-                            "'I'm here to assist only with climate, environment, and Earth-related topics! 🌍' "
-                            "Here is the user's question:\n"
-                            f"{user_input}"
-                        )
-
-                        response = model.generate_content(system_prompt)
-                        full_response = response.text
-
-                        output_placeholder = st.empty()
-                        displayed_text = ""
-                        cursor_visible = True
-
-                        for char in full_response:
-                            displayed_text += char
-                            if cursor_visible:
-                                output_placeholder.markdown(f"🧠 {displayed_text}|")
-                            else:
-                                output_placeholder.markdown(f"🧠 {displayed_text} ")
-                            cursor_visible = not cursor_visible
-                            time.sleep(0.02)
-
-                        output_placeholder.markdown(f"🧠 {displayed_text}")
-                        st.success("Done! ✅")
-
-                else:
-                    # 2. Not about temperature, send normally to Gemini
-                    model = genai.GenerativeModel('gemini-1.5-pro')
-
-                    system_prompt = (
-                        "You are PlanetAI, an expert in climate change, natural disasters, environmental protection, CO₂ emissions, deforestation, "
-                        "and sustainability. Only answer questions related to these topics. "
-                        "If the user's question is irrelevant (like gaming, politics, or gossip), politely reply: "
-                        "'I'm here to assist only with climate, environment, and Earth-related topics! 🌍' "
-                        "Here is the user's question:\n"
-                        f"{user_input}"
-                    )
-
-                    response = model.generate_content(system_prompt)
-                    full_response = response.text
-
-                    output_placeholder = st.empty()
-                    displayed_text = ""
-                    cursor_visible = True
-
-                    for char in full_response:
-                        displayed_text += char
-                        if cursor_visible:
-                            output_placeholder.markdown(f"🧠 {displayed_text}|")
-                        else:
-                            output_placeholder.markdown(f"🧠 {displayed_text} ")
-                        cursor_visible = not cursor_visible
-                        time.sleep(0.02)
-
-                    output_placeholder.markdown(f"🧠 {displayed_text}")
-                    st.success("Done! ✅")
+                output_placeholder.markdown(f"🧠 {displayed_text}")
+                st.success("Done! ✅")
 
             except Exception as e:
                 st.error(f"⚠️ Error: {e}")
+
 
 
 
