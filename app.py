@@ -240,7 +240,7 @@ with tab4:
 
     with st.spinner("Generating future forecast..."):
         try:
-            model = genai.GenerativeModel('gemini-1.5-pro')
+            model = genai.GenerativeModel('gemini-2.0-flash-lite')
             prompt = "Predict the trend of global natural disasters between 2025 and 2040 considering rising climate change impacts. Give a short futuristic summary."
             response = model.generate_content(prompt)
             forecast_text = response.text
