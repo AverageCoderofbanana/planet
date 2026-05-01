@@ -182,7 +182,7 @@ with tab3:
         with st.spinner("Thinking... 🌎"):
             try:
                 # No more temperature special handling, everything goes to Gemini
-                model = genai.GenerativeModel('gemini-2.0-flash-lite')
+                model = genai.GenerativeModel('gemini-2.5-flash')
 
                 system_prompt = (
                     "You are PlanetAI, an expert in climate change, natural disasters, environmental protection, CO₂ emissions, deforestation, "
@@ -240,7 +240,7 @@ with tab4:
 
     with st.spinner("Generating future forecast..."):
         try:
-            model = genai.GenerativeModel('gemini-2.0-flash-lite')
+            model = genai.GenerativeModel('gemini-2.5-flash')
             prompt = "Predict the trend of global natural disasters between 2025 and 2040 considering rising climate change impacts. Give a short futuristic summary."
             response = model.generate_content(prompt)
             forecast_text = response.text
